@@ -14,17 +14,22 @@ const io = new Server(httpServer, {
   },
 });
 
+var onlineUsers = 0;
 // socket connecting
 io.on("connection", (socket) => {
   // console.log(`new user joioned ${socket.id}`);
 
-  // broadcast a message to all users when a new user joins the chat
-  // socket.on("user-joined",(user)=>{
-  //   console.log("user joined:",user)
-  //   socket.broadcast.emit("joined-msg",{
-  //     message: `${user} joined the chat`
+  // show how many users are joined
+  onlineUsers++;
+  io.sockets.emit("online-users", { msg: `${onlineUsers} Users Joined` });
 
-  // })})
+  // broadcast a message to all users when a new user joins the chat
+  socket.on("user-joined", (user) => {
+    // console.log("user joined:",user)
+    socket.broadcast.emit("joined-msg", {
+      message: `${user} joined the chat`,
+    });
+  });
 
   // fetch message from client and send again to users
   socket.on("send", (message) => {
@@ -34,12 +39,15 @@ io.on("connection", (socket) => {
 
   // socket disconnecting
   socket.on("disconnect", () => {
-    console.log(`User disconnected: ${socket.id}`);
+    // console.log(`User disconnected: ${socket.id}`);
+    // console.log(users)
+    onlineUsers--;
+    io.sockets.emit("online-users", onlineUsers);
   });
 });
 
 // server listening on port
 const port = process.env.PORT || 4000;
 httpServer.listen(port, () => {
-  console.log(`Server is running at port ${port}`);
+  console.log(`server is running at port ${port}`);
 });
