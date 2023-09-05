@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { IoMdSend } from "react-icons/io";
 import { BsEmojiSunglasses } from "react-icons/bs";
 import { io } from "socket.io-client";
-const socket = io("http://localhost:4000/");
+const socket = io(process.env.REACT_APP_BASE_URL);
 
 const Chats = () => {
   // states managements
