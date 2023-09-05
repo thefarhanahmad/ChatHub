@@ -147,6 +147,7 @@ const Chats = () => {
                 placeholder="Write your message..."
                 {...register("message")}
                 className="border-2 w-[80%] rounded-md p-1 px-3 bg-[#E0F2FE]"
+                required
               />
               <button className="p-2 rounded-full flex justify-center items-center bg-[#0284C7] text-white">
                 <IoMdSend />
