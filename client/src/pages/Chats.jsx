@@ -2,7 +2,9 @@ import React, { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { IoMdSend } from "react-icons/io";
 import { BsEmojiSunglasses } from "react-icons/bs";
+import { GoLinkExternal } from "react-icons/go";
 import { io } from "socket.io-client";
+import { Link } from "react-router-dom";
 const socket = io(process.env.REACT_APP_BASE_URL);
 
 const Chats = () => {
@@ -11,11 +13,22 @@ const Chats = () => {
   const chatContainerRef = useRef(null);
   const [chats, setChats] = useState([]);
   const [user, setUser] = useState([]);
+  const [onlineUsers, setOnlineUsers] = useState("");
+  const [userJoined, setUserJoined] = useState();
 
-  // logging to check existing values
-  // console.log("user :", user);
-  // console.log("chats :", chats);
+  // show online users
+  useEffect(() => {
+    socket.on("online-users", (onlineUsers) => {
+      // console.log(onlineUsers);
+      setOnlineUsers(onlineUsers.msg);
+    });
 
+    // user joined the chats
+    socket.on("joined-msg", (msg) => {
+      // console.log(msg.message);
+      setUserJoined(msg.message);
+    });
+  }, []);
   // Getting user from local storage and setUser
   useEffect(() => {
     setUser(JSON.parse(localStorage.getItem("user")));
@@ -40,6 +53,9 @@ const Chats = () => {
     }
   }, [chats]);
 
+  // notice to all joined users
+  socket.emit("user-joined", user);
+
   // funtion to get message from socket
   useEffect(() => {
     const getMessage = async () => {
@@ -55,15 +71,45 @@ const Chats = () => {
     <div className="bg-gradient-to-r from-indigo-500 from-10% via-sky-500 via-30% to-emerald-500 to-90% w-full h-screen p-2 sm:p-6 overflow-hidden box-border">
       <div className="w-full sm:w-3/4 m-auto flex flex-col sm:h-[95vh] h-[98vh]  rounded-lg overflow-hidden">
         {/* header */}
-        <div className="bg-[#075985] w-full h-[10%] flex  justify-center items-center font-sans font-bold text-white text-3xl">
+        <div className="bg-[#075985] relative w-full h-[10%] flex  justify-center items-center font-sans font-bold text-white text-3xl">
+          <span>
+            {/* online users */}
+            {onlineUsers && (
+              <span className="text-[0.5rem] text-green-400 absolute  left-4 top-[50%] -translate-y-[50%] underline underline-offset-2">
+                {onlineUsers}
+              </span>
+            )}
+          </span>
           ChatHub
+          <span className="absolute right-4 top-[70%] -translate-y-[50%]  h-[80%]">
+            <Link
+              to="https://www.linkedin.com/in/farhan-ahmad-21a07524b/"
+              className="flex flex-col justify-center items-center"
+            >
+              <img
+                src="https://media.licdn.com/dms/image/D4D03AQHmGAZvxQHd4w/profile-displayphoto-shrink_400_400/0/1675619757656?e=1699488000&v=beta&t=lA6UsjM9C2oxdmn6yUCYvbsjmLADKJDnG6udmBniaWo"
+                alt="img"
+                width={"25rem"}
+                className="rounded-full"
+              />
+              <div className="text-[0.4rem] -mt-2 flex justify-center items-center gap-1">
+                <GoLinkExternal />
+                <span>Follow me</span>
+              </div>
+            </Link>
+          </span>
         </div>
-
         {/*chats messages */}
         <div
           ref={chatContainerRef}
-          className="bg-[#BAE6FD] h-[80%] w-full overflow-y-auto"
+          className="bg-[#BAE6FD] h-[80%] w-full overflow-y-auto relative"
         >
+          {/* userjoined message */}
+          {userJoined && (
+            <div className="text-[0.6rem] font-mono left-[50%] rounded-md px-2 -translate-x-[50%] mt-0 fixed bg-slate-200 ">
+              {userJoined}
+            </div>
+          )}
           {chats.map((chat, i) => {
             return (
               <div
